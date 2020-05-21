@@ -36,7 +36,7 @@
              small
              color="indigo"
              title="Add new list"
-             @click="addItem('ListDone')"
+             @click="addItem('DoneList')"
            >
              <v-icon>mdi-format-list-checks</v-icon>
            </v-btn>
@@ -54,8 +54,14 @@
       
       <v-card>
       <v-row>
-        <v-col class="mt-10" cols="12" sm="6" v-for="(item, index) in arrOfLists" :key="item.key">
-          <component  @delete-list="deleteList(index)" :is="item.type"></component>
+        <v-col class="mt-10" cols="12" sm="6" v-for="(item, index) in arrOfLists" :key="item.id">
+          <component
+            @delete-list="deleteList(index)"
+            :is="item.type" 
+            :state-data="item.data"
+            @update = "update($event, index)"
+          >
+          </component>
         </v-col>
       </v-row>
      </v-card>
@@ -64,32 +70,64 @@
 </template>
 
 <script>
-
-import ListDone from './components/done-list';
+import mixin from './components/mixin.js';
+import DoneList from './components/done-list';
 import Notes from './components/notes';
+
+console.log(mixin);
 
 export default {
   name: 'App',
-
+  mixins: [mixin],
   components: {
-    ListDone,
+    DoneList,
     Notes
   },
 
   data: () => ({
-    arrOfLists: [{key: 0, type: 'ListDone'}],
-    key: 1
+    arrOfLists: [{
+      id: 0,
+      type: 'DoneList',
+      data: {
+        items: [{text: 'to eat', done: true, id: 0, editingText: false},{text: 'to sleep', done: false, id: 1, editingText: false}],
+        title: ''
+      }
+    }],
+    emptyData: {
+      DoneList: {
+        items: []
+      },
+        Notes: {
+          note: ''
+        }
+    },
   }),
+  created(){
+    if(localStorage.keeper){
+      this.arrOfLists = JSON.parse(localStorage.keeper)
+    }
+  },
   methods: {
     addItem(type){
-      this.arrOfLists.unshift({type, key: this.key++});
+      const id = this.getNextId(this.arrOfLists, true);
+      this.arrOfLists.unshift({type, id, data: this.emptyData[type]});
+      this.save();
     },
     deleteList(index){
       let quest = confirm('Delete this list?')
         if (quest){
           this.arrOfLists.splice(index, 1);
+          this.save();
         }
     },
+    update(val, index){
+      console.log(val);
+      this.arrOfLists[index].data = val;
+      this.save();
+    },
+    save(){
+      localStorage.keeper = JSON.stringify(this.arrOfLists);
+    }
   }
 };
 </script>

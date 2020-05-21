@@ -10,7 +10,7 @@
           class="mt-7 hiddenn" 
           title="remove list"
           id="delete-list" 
-          :class="{hidden: title.editingTitle}" 
+          :class="{hidden: editingTitle}" 
           icon absolute top right fab x-small>
             <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -21,8 +21,8 @@
               single-line 
               autofocus 
               class="ml-3"
-              v-if="title.editingTitle" 
-              v-model="title.name" 
+              v-if="editingTitle" 
+              v-model="title" 
               v-on:keyup.enter="endEditList" 
               @blur="endEditList">
             </v-text-field>
@@ -30,19 +30,18 @@
         </v-row>
 
         <v-card-title 
-          v-model="title.name" 
+          v-model="title" 
           @click="editList" 
-          :class="{hiddenn: title.editingTitle, titlehid: title.editingTitle}">
-          {{title.name || 'List name'}}
+          :class="{hiddenn: editingTitle, titlehid: editingTitle}">
+          {{title || 'List name'}}
         </v-card-title>
-
-        <p class="date pl-4 body-2 ml-auto">{{date}}</p>
+        <p class="date pl-4 body-2 ml-auto" v-if="date.modified">Updated: {{date.modified}}</p>
 
         <div class="d-flex align-center">
           <v-text-field 
             single-line
             class="ml-3 mr-3" 
-            v-model='text' 
+            v-model='newItemText' 
             v-on:keyup.enter="add" 
             placeholder="enter your text here">
           </v-text-field>
@@ -53,7 +52,7 @@
             id="add-button" 
             color="indigo" 
             @click="add" 
-            :disabled="!text.length">
+            :disabled="!newItemText.length">
           Add</v-btn>
         </div> 
 
@@ -68,7 +67,7 @@
                 color="indigo" 
                 v-model="item.done" 
                 class="mr-2"
-                @change="CreateDate"
+                @change="modifyDate"
                 ></v-checkbox>
               
               <v-text-field 
@@ -102,22 +101,34 @@
                 <v-icon>mdi-delete-outline</v-icon>
               </v-btn>
             </li>
-          </v-list>  
+          </v-list>
+          <p class="text-right date pr-3 body-2 ml-auto mb-0">Created: {{date.created}}</p>    
        </div>
     </v-card>
   </v-container>
 </template>
 
 <script>
+  import mixin from './mixin.js';
+
   export default {
-    name: 'ListDone',
+    name: 'DoneList',
+    mixins: [mixin],
     data: () => ({
-    title: {name: '', editingTitle: false},
-    text: '',
-    date: null,
-    items: [{text: 'to eat', done: true, id: 0, editingText: false},{text: 'to sleep', done: false, id: 1, editingText: false}],
-    id: 3
+    title: '',
+    editingTitle: false,
+    newItemText: '',
+    date: {created: '', modified: ''},
+    items: [],
   }),
+  props: {stateData: {
+    type: Object, required: true
+  }},
+  created(){
+    this.title = this.stateData.title
+    this.items = JSON.parse(JSON.stringify(this.stateData.items))
+    this.date.created = this.currentDate()
+  },
   computed: {
     sorted(){
       let newArr = [...this.items];
@@ -128,30 +139,34 @@
   },
   methods: {
     editList(){
-      this.title.editingTitle = true;
+      this.editingTitle = true;
     },
     endEditList(){
-      this.title.editingTitle = false;
-      if (!this.date&&this.title.name.length){
-      this.CreateDate();
-      }
+      this.editingTitle = false;
+      this.modifyDate();
     },
-    CreateDate(){
-      var today = new Date();
-      var date = today.getDate()+'.'+(today.getMonth()+1)+'.'+today.getFullYear();
-      this.date = 'Created: ' + date;
+    modifyDate(){
+      this.date.modified = this.currentDate();
+      const localState = {
+        title: this.title,
+        date: this.date,
+        items: this.items,
+        type: 'DoneList'
+      }
+      this.$emit('update', localState);
+      
     },
     add(){
-      if (this.text.length){
-      this.items.push({id: this.id, text: this.text, done: false, editingText: false});
-      this.id++;
-      this.text = '';
-      this.CreateDate();
+      if (this.newItemText.length){
+        const id = this.getNextId(this.items)
+        this.items.push({id, text: this.newItemText, done: false, editingText: false});
+        this.newItemText = '';
+        this.modifyDate();
       }
     },
   status(item){
     item.done = !item.done;
-    this.CreateDate();
+    this.modifyDate();
   },
   editTask(item){
     item.editingText = true;
@@ -159,15 +174,16 @@
     this.$nextTick( function(){this.$refs.editInput[0].focus()} );
   },
   endEdit(item){
+    console.log(item)
     item.editingText = false;
-    if (!this.date && item.text !== item.prevText){
-    this.CreateDate();
+    if (this.newItemText !== item.prevText){
+    this.modifyDate();
     }
   },
   removeTask(item){
     let index = this.items.indexOf(item);
     this.items.splice(index,1);
-    this.deleted.push(item);
+    this.modifyDate();
   },
   deleteList(){
     this.$emit('delete-list');

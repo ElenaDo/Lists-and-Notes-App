@@ -1,17 +1,17 @@
 <template>
   <v-container>
     <v-card
-          class="mx-auto pl-3 pb-3"
-          max-width="500"
-          color="amber lighten-4"
-        >
+      class="mx-auto pl-3 pb-3"
+      max-width="500"
+      color="amber lighten-4"
+      >
       <div class="mt-2" id="card-wrapper">
         <v-btn 
           @click="deleteList" 
           class="mt-7 hiddenn" 
           title="remove list"
           id="delete-list" 
-          :class="{hiddenn: title.editingTitle}" 
+          :class="{hiddenn: editingTitle}" 
           icon absolute top right fab x-small>
             <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -22,8 +22,8 @@
               autofocus
               color="orange orange-darken-4" 
               class="ml-3"
-              v-if="title.editingTitle" 
-              v-model="title.name" 
+              v-if="editingTitle" 
+              v-model="title" 
               v-on:keyup.enter="endEditTitle(title)" 
               @blur="endEditTitle(title)">
             </v-text-field>
@@ -31,71 +31,89 @@
         </v-row>
         <v-card-title
           @click="editTitle(title)" 
-          :class="{hidden: title.editingTitle}">
-          {{title.name || 'Note name'}}
+          :class="{hidden: editingTitle}">
+          {{title || "Note name"}}
         </v-card-title>
-        <p class="date pl-4 body-2 ml-auto">{{note.created}}</p>
+        <p class="date pl-4 body-2 ml-auto" v-if="date.modified">Updated: {{date.modified}}</p>
         <v-textarea
           autofocus
           class="mx-5 pb-3 pt-0"
           background-color="amber lighten-4"
           color="orange orange-darken-4"
           rows="1"
-          v-model="note.text"
-          v-if="note.editingNote"
+          v-model="note"
+          v-if="editingNote"
           auto-grow
           @blur="endEditNote"
         ></v-textarea>
         
         <div class="mx-5 mb-5 notebox" 
         >
-        <p @click="editNote(note)" :class="{hidden: note.editingNote}">{{note.text || 'Take a note...'}}</p>
+        <p @click="editNote(note)" :class="{hidden: editingNote}">{{note || "Take a note..."}}</p>
         </div> 
-         <v-btn v-if="note.editingNote&&note.text.length"
+         <v-btn v-if="editingNote&&note.length"
             class="white--text"
-            outlined color="warning"
+            outlined color='warning'
             absolute
             right
             bottom
             @click="endEditNote()">
           close</v-btn>
-       </div>
+      </div>
+      <p class="date">Created: {{date.created}}</p>
        
-       
-       </v-card>
+    </v-card>
   </v-container>
 </template>
 
 <script>
+import mixin from './mixin.js';
+
   export default {
     name: 'Notes',
+    mixins: [mixin],
     data: () => ({
-    date: null,
-    title: {name: "", editingTitle: false},
-    note: {text: "", editingNote: false}
+    date: {created: '', modified: ''},
+    title: '', 
+    editingTitle: false,
+    note: '', 
+    editingNote: false,
   }),
+  props: {stateData: {
+    type: Object, required: true
+  }},
+  created(){
+    this.title = this.stateData.title
+    this.note = this.stateData.note
+    this.date.created = this.currentDate();
+  },
   methods: {
-    CreateDate(){
-      var today = new Date();
-      var date = today.getDate()+'.'+(today.getMonth()+1)+'.'+today.getFullYear();
-      this.note.created = 'Created: ' + date;
+    modifiedDate(){
+      this.date.modified = this.currentDate();
+      const localState = {
+        title: this.title,
+        date: this.date,
+        note: this.note,
+        type: 'Notes'
+      }
+      this.$emit('update', localState);
     },
-    editTitle(title){
-      title.editingTitle = true;
+    editTitle(){
+      this.editingTitle = true;
     },
-    endEditTitle(title){
-      title.editingTitle = false;
-        if(!this.date&&this.title.name.length){
-          this.CreateDate();
+    endEditTitle(){
+      this.editingTitle = false;
+        if(!this.createDate&&this.title.length){
+          this.modifiedDate();
         }
     },
     editNote(){
-      this.note.editingNote = true;
+      this.editingNote = true;
     },
     endEditNote(){
-      this.note.editingNote = false;
-        if(!this.date&&this.note.text.length){
-          this.CreateDate();
+      this.editingNote = false;
+        if(!this.createDate&&this.note.length){
+          this.modifiedDate();
         }
     },
     deleteList(){
