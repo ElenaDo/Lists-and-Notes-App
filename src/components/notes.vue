@@ -60,8 +60,7 @@
             @click="endEditNote()">
           close</v-btn>
       </div>
-      <p class="date">Created: {{date.created}}</p>
-       
+      <p class="text-right date pr-4 body-2 ml-auto mb-0" :class="{hidden: editingNote}">Created: {{date.created}}</p>
     </v-card>
   </v-container>
 </template>
@@ -83,9 +82,9 @@ import mixin from './mixin.js';
     type: Object, required: true
   }},
   created(){
-    this.title = this.stateData.title
-    this.note = this.stateData.note
-    this.date.created = this.currentDate();
+    this.title = this.stateData.title;
+    this.note = this.stateData.note;
+    this.date = this.stateData.date;
   },
   methods: {
     modifiedDate(){

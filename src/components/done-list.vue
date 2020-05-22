@@ -102,7 +102,7 @@
               </v-btn>
             </li>
           </v-list>
-          <p class="text-right date pr-3 body-2 ml-auto mb-0">Created: {{date.created}}</p>    
+          <p class="text-right date pr-4 body-2 ml-auto mb-0">Created: {{date.created}}</p>    
        </div>
     </v-card>
   </v-container>
@@ -127,7 +127,7 @@
   created(){
     this.title = this.stateData.title
     this.items = JSON.parse(JSON.stringify(this.stateData.items))
-    this.date.created = this.currentDate()
+    this.date = this.stateData.date;
   },
   computed: {
     sorted(){
@@ -174,7 +174,6 @@
     this.$nextTick( function(){this.$refs.editInput[0].focus()} );
   },
   endEdit(item){
-    console.log(item)
     item.editingText = false;
     if (this.newItemText !== item.prevText){
     this.modifyDate();

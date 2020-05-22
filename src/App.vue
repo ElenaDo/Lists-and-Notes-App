@@ -73,9 +73,6 @@
 import mixin from './components/mixin.js';
 import DoneList from './components/done-list';
 import Notes from './components/notes';
-
-console.log(mixin);
-
 export default {
   name: 'App',
   mixins: [mixin],
@@ -84,24 +81,28 @@ export default {
     Notes
   },
 
-  data: () => ({
+  data() {
+    return {
     arrOfLists: [{
       id: 0,
       type: 'DoneList',
       data: {
         items: [{text: 'to eat', done: true, id: 0, editingText: false},{text: 'to sleep', done: false, id: 1, editingText: false}],
-        title: ''
+        title: '',
+        date: {created: this.currentDate()}
       }
     }],
     emptyData: {
       DoneList: {
-        items: []
+        items: [],
+        date: {}
       },
         Notes: {
-          note: ''
+          note: '',
+          date: {}
         }
     },
-  }),
+  }},
   created(){
     if(localStorage.keeper){
       this.arrOfLists = JSON.parse(localStorage.keeper)
@@ -110,7 +111,9 @@ export default {
   methods: {
     addItem(type){
       const id = this.getNextId(this.arrOfLists, true);
-      this.arrOfLists.unshift({type, id, data: this.emptyData[type]});
+      const data = this.emptyData[type];
+      data.date.created = this.currentDate();
+      this.arrOfLists.unshift({type, id, data});
       this.save();
     },
     deleteList(index){
@@ -121,7 +124,6 @@ export default {
         }
     },
     update(val, index){
-      console.log(val);
       this.arrOfLists[index].data = val;
       this.save();
     },
