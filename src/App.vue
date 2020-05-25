@@ -5,11 +5,9 @@
       color="indigo"
       dark
     >
-      <v-icon large class="mr-3">mdi-bookmark-check-outline</v-icon>  To Do List App
+      <v-icon large class="mr-3">mdi-bookmark-check-outline</v-icon>  Notes and Lists Keeper
     </v-app-bar>
-  
     <v-content class="py-15">
-      
       <v-speed-dial
           color="pink"
           fab
@@ -19,9 +17,7 @@
           right
           direction="left"
           open-on-hover
-
           >
-
             <v-btn
              slot="activator"
              color="pink"
@@ -51,13 +47,16 @@
              <v-icon>mdi-note-outline</v-icon>
            </v-btn>
           </v-speed-dial>
-      
       <v-card>
       <v-row>
-        <v-col class="mt-10" cols="12" sm="6" v-for="(item, index) in arrOfLists" :key="item.id">
+        <v-col class="mt-10" 
+          cols="12" sm="6" 
+          v-for="(item, index) in arrOfLists" 
+          :key="item.id"
+        >
           <component
             @delete-list="deleteList(index)"
-            :is="item.type" 
+            :is="item.type"
             :state-data="item.data"
             @update = "update($event, index)"
           >
@@ -68,7 +67,6 @@
     </v-content>
   </v-app>
 </template>
-
 <script>
 import mixin from './components/mixin.js';
 import DoneList from './components/done-list';
@@ -80,14 +78,24 @@ export default {
     DoneList,
     Notes
   },
-
   data() {
     return {
     arrOfLists: [{
       id: 0,
       type: 'DoneList',
       data: {
-        items: [{text: 'to eat', done: true, id: 0, editingText: false},{text: 'to sleep', done: false, id: 1, editingText: false}],
+        items: [{
+          text: 'to eat', 
+          done: true, 
+          id: 0, 
+          editingText: false
+          },
+          {
+          text: 'to sleep', 
+          done: false, 
+          id: 1, 
+          editingText: false
+        }],
         title: '',
         date: {created: this.currentDate()}
       }

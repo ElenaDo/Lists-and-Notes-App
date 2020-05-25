@@ -11,7 +11,7 @@
           class="mt-7 hiddenn" 
           title="remove list"
           id="delete-list" 
-          :class="{hiddenn: editingTitle}" 
+          :class="{ hiddenn: editingTitle }" 
           icon absolute top right fab x-small>
             <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -31,10 +31,13 @@
         </v-row>
         <v-card-title
           @click="editTitle(title)" 
-          :class="{hidden: editingTitle}">
-          {{title || "Note name"}}
+          :class="{ hidden: editingTitle }">
+          {{ title || "Note name" }}
         </v-card-title>
-        <p class="date pl-4 body-2 ml-auto" v-if="date.modified">Updated: {{date.modified}}</p>
+        <p class="date pl-4 body-2 ml-auto" 
+          v-if="date.modified">
+          Updated: {{ date.modified }}
+        </p>
         <v-textarea
           autofocus
           class="mx-5 pb-3 pt-0"
@@ -46,28 +49,33 @@
           auto-grow
           @blur="endEditNote"
         ></v-textarea>
-        
-        <div class="mx-5 mb-5 notebox" 
-        >
-        <p @click="editNote(note)" :class="{hidden: editingNote}">{{note || "Take a note..."}}</p>
+        <div class="mx-5 mb-5 notebox">
+          <p @click="editNote(note)" 
+            :class="{ hidden: editingNote }">
+            {{ note || "Take a note..." }}
+          </p>
         </div> 
-         <v-btn v-if="editingNote&&note.length"
+        <v-btn v-if="editingNote && note.length"
             class="white--text"
             outlined color='warning'
             absolute
             right
             bottom
-            @click="endEditNote()">
-          close</v-btn>
+            @click="endEditNote()"
+        >
+          save
+        </v-btn>
       </div>
-      <p class="text-right date pr-4 body-2 ml-auto mb-0" :class="{hidden: editingNote}">Created: {{date.created}}</p>
+      <p class="text-right date pr-4 body-2 ml-auto mb-0" 
+        :class="{ hidden: editingNote }"
+      >
+        Created: {{ date.created }}
+      </p>
     </v-card>
   </v-container>
 </template>
-
 <script>
-import mixin from './mixin.js';
-
+  import mixin from './mixin.js';
   export default {
     name: 'Notes',
     mixins: [mixin],
@@ -77,10 +85,12 @@ import mixin from './mixin.js';
     editingTitle: false,
     note: '', 
     editingNote: false,
-  }),
-  props: {stateData: {
+    }),
+  props: {
+    stateData: {
     type: Object, required: true
-  }},
+    }
+  },
   created(){
     this.title = this.stateData.title;
     this.note = this.stateData.note;
@@ -102,7 +112,7 @@ import mixin from './mixin.js';
     },
     endEditTitle(){
       this.editingTitle = false;
-        if(!this.createDate&&this.title.length){
+        if(!this.createDate && this.title.length){
           this.modifiedDate();
         }
     },
@@ -111,7 +121,7 @@ import mixin from './mixin.js';
     },
     endEditNote(){
       this.editingNote = false;
-        if(!this.createDate&&this.note.length){
+        if(!this.createDate && this.note.length){
           this.modifiedDate();
         }
     },
@@ -122,7 +132,6 @@ import mixin from './mixin.js';
 };
 </script>
 <style>
-
 .hidden{
   display: none;
 }
@@ -140,7 +149,6 @@ import mixin from './mixin.js';
   position: absolute;
   right: 0;
   bottom: 0;
-
 }
 .notebox:after {
   content: '';
@@ -160,18 +168,14 @@ import mixin from './mixin.js';
 #card-wrapper:hover #delete-list{
   visibility: visible;
 }
-
 li:hover > button{
   visibility: visible;
 }
-
 li button.invisible{
   visibility: hidden;
 }
 div>button.v-btn--disabled:disabled#add-button{
   background-color: #9aa6e6 !important;
   color: white !important;
-
 }
-
 </style>
